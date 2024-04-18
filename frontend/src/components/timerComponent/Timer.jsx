@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./timer.scss";
 import { updateTimeLeft, removeTimer } from "../../redux/reducers/timerSlice";
-import { worldclockSelector } from "../../redux/reducers/worldclockSlice";
 import { useDispatch, useSelector } from "react-redux";
-
+import PropTypes from "prop-types";
 const Timer = ({
   startTime,
   removeTimerHandler,
@@ -11,10 +10,10 @@ const Timer = ({
   id,
   isPause,
   name,
+  loading,
+  actionId,
 }) => {
   const dispatch = useDispatch();
-
-  const timeSpendState = useSelector(worldclockSelector);
 
   const timer = useSelector((state) =>
     state.timer.find((timer) => timer.id === id)
@@ -57,12 +56,21 @@ const Timer = ({
         <span className="title">{name}</span>
         {formatTime(timer.timeLeft)}
       </span>
-      <button
-        className="pause-button"
-        onClick={() => pauseTimer(id, startTime * 60 - timer.timeLeft)}
-      >
-        {isPause ? "Resume" : "Pause"}
-      </button>
+      {isPause ? (
+        <button
+          className="pause-button"
+          onClick={() => pauseTimer(id, startTime * 60 - timer.timeLeft)}
+        >
+          {id === actionId && loading ? "...wait" : "Resume"}
+        </button>
+      ) : (
+        <button
+          className="pause-button"
+          onClick={() => pauseTimer(id, startTime * 60 - timer.timeLeft)}
+        >
+          {id === actionId && loading ? "...wait" : "Pause"}
+        </button>
+      )}
       <button
         className="close-button"
         onClick={() => removeTimerHandler(id, startTime * 60 - timer.timeLeft)}
@@ -71,6 +79,17 @@ const Timer = ({
       </button>
     </div>
   );
+};
+
+Timer.propTypes = {
+  startTime: PropTypes.string.isRequired,
+  removeTimerHandler: PropTypes.func.isRequired,
+  pauseTimer: PropTypes.func.isRequired,
+  id: PropTypes.string.isRequired,
+  isPause: PropTypes.bool.isRequired,
+  name: PropTypes.string.isRequired,
+  loading: PropTypes.bool.isRequired,
+  actionId: PropTypes.string.isRequired,
 };
 
 export default Timer;
